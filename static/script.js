@@ -35,20 +35,39 @@ async function startRecording() {
         // Demander l'accès au microphone
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        // Créer le MediaRecorder
-        mediaRecorder = new MediaRecorder(stream);
+        // Créer le MediaRecorder avec options pour meilleure compatibilité
+        const options = {
+            mimeType: 'audio/webm;codecs=opus'
+        };
+        
+        // Fallback si le format n'est pas supporté
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options.mimeType = 'audio/webm';
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/ogg;codecs=opus';
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = '';
+                }
+            }
+        }
+        
+        mediaRecorder = new MediaRecorder(stream, options);
         audioChunks = [];
         
         // Collecter les données audio
         mediaRecorder.addEventListener('dataavailable', event => {
-            audioChunks.push(event.data);
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+                console.log('Audio chunk collecté:', event.data.size, 'bytes');
+            }
         });
         
         // Traiter l'audio quand l'enregistrement s'arrête
         mediaRecorder.addEventListener('stop', handleRecordingComplete);
         
-        // Démarrer l'enregistrement
-        mediaRecorder.start();
+        // Démarrer l'enregistrement avec timeslice pour capturer régulièrement
+        // 100ms = collecte toutes les 100ms pour ne rien perdre
+        mediaRecorder.start(100);
         isRecording = true;
         recordingStartTime = Date.now();
         
