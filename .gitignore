@@ -1,0 +1,24 @@
+# Environnement
+.env
+venv/
+__pycache__/
+*.pyc
+
+# Fichiers temporaires
+uploads/*
+!uploads/.gitkeep
+*.wav
+*.mp3
+*.ogg
+*.webm
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+

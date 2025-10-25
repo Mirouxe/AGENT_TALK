@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.DS_Store
+uploads/*
+!uploads/.gitkeep
+*.md
+test_*.py
+aide_*.py
+verifier_*.py
+lister_*.py
+configurer_*.py
+

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocal → Transcription → Notion</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ Vocal → Notion</h1>
+            <p class="subtitle">Enregistrez, transcrivez et organisez vos notes vocales dans Notion</p>
+        </header>
+
+        <main>
+            <div class="card recorder-card">
+                <div class="recorder-status" id="recorder-status">
+                    <div class="status-indicator" id="status-indicator"></div>
+                    <span id="status-text">Prêt à enregistrer</span>
+                </div>
+
+                <div class="recorder-controls">
+                    <button id="record-btn" class="btn btn-record" onclick="toggleRecording()">
+                        <span class="btn-icon">🎤</span>
+                        <span class="btn-text">Commencer l'enregistrement</span>
+                    </button>
+                    
+                    <div id="recording-info" class="recording-info" style="display: none;">
+                        <div class="timer" id="timer">00:00</div>
+                        <div class="waveform" id="waveform">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <audio id="audio-playback" controls style="display: none; width: 100%; margin-top: 20px;"></audio>
+            </div>
+
+            <div class="card process-card" id="process-card" style="display: none;">
+                <h2>📋 Traitement en cours...</h2>
+                <div class="progress-steps">
+                    <div class="step" id="step-transcription">
+                        <div class="step-icon">🎧</div>
+                        <div class="step-content">
+                            <div class="step-title">Transcription</div>
+                            <div class="step-status">En attente...</div>
+                        </div>
+                    </div>
+                    <div class="step" id="step-cleaning">
+                        <div class="step-icon">✨</div>
+                        <div class="step-content">
+                            <div class="step-title">Nettoyage & Structuration</div>
+                            <div class="step-status">En attente...</div>
+                        </div>
+                    </div>
+                    <div class="step" id="step-notion">
+                        <div class="step-icon">📄</div>
+                        <div class="step-content">
+                            <div class="step-title">Création page Notion</div>
+                            <div class="step-status">En attente...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card result-card" id="result-card" style="display: none;">
+                <h2>✅ Traitement terminé !</h2>
+                
+                <div class="result-section">
+                    <h3>📝 Transcription originale</h3>
+                    <div class="text-box" id="transcription-text"></div>
+                </div>
+
+                <div class="result-section">
+                    <h3>✨ Texte nettoyé et structuré</h3>
+                    <div class="text-box" id="cleaned-text"></div>
+                </div>
+
+                <div class="result-section">
+                    <h3>🔗 Page Notion</h3>
+                    <a id="notion-link" href="#" target="_blank" class="btn btn-notion">
+                        Ouvrir dans Notion →
+                    </a>
+                </div>
+
+                <button class="btn btn-new" onclick="resetApp()">
+                    Nouvel enregistrement
+                </button>
+            </div>
+
+            <div class="card error-card" id="error-card" style="display: none;">
+                <h2>❌ Erreur</h2>
+                <p id="error-message"></p>
+                <button class="btn btn-new" onclick="resetApp()">
+                    Réessayer
+                </button>
+            </div>
+        </main>
+
+        <footer>
+            <p>Pipeline: Vocal → Whisper API → ChatGPT → Notion API</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
+
