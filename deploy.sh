@@ -79,43 +79,98 @@ read -r response
 
 if [[ "$response" == "o" || "$response" == "oui" || "$response" == "y" ]]; then
     echo ""
-    echo "📝 Entrez l'URL de votre dépôt GitHub:"
-    echo "   (Format: https://github.com/USERNAME/REPO.git)"
-    read -r github_url
+    echo "🔐 Configuration GitHub avec Personal Access Token"
+    echo ""
     
-    if [ -n "$github_url" ]; then
-        # Vérifier si origin existe déjà
-        if git remote | grep -q "^origin$"; then
-            echo "ℹ️  Remote origin existe déjà, mise à jour..."
-            git remote set-url origin "$github_url"
-        else
-            echo "📎 Ajout du remote origin..."
-            git remote add origin "$github_url"
-        fi
+    # Demander le token ou utiliser une variable d'environnement
+    if [ -n "$GITHUB_TOKEN" ]; then
+        echo "✅ Token GitHub trouvé dans les variables d'environnement"
+        github_token="$GITHUB_TOKEN"
+    else
+        echo "📝 Entrez votre Personal Access Token GitHub:"
+        echo "   (Le token ne sera pas affiché pour des raisons de sécurité)"
+        read -rs github_token
+        echo ""
+    fi
+    
+    if [ -z "$github_token" ]; then
+        echo "❌ Token non fourni, abandon du push"
+        exit 1
+    fi
+    
+    # Demander username et nom du repo
+    echo "📝 Entrez votre username GitHub:"
+    read -r github_username
+    
+    echo "📝 Entrez le nom du dépôt (ex: agent-talk):"
+    read -r repo_name
+    
+    if [ -z "$github_username" ] || [ -z "$repo_name" ]; then
+        echo "❌ Username ou nom de dépôt manquant"
+        exit 1
+    fi
+    
+    # Construire l'URL avec le token
+    github_url="https://${github_token}@github.com/${github_username}/${repo_name}.git"
+    
+    echo ""
+    echo "📍 Dépôt: https://github.com/${github_username}/${repo_name}.git"
+    echo ""
+    
+    # Vérifier si origin existe déjà
+    if git remote | grep -q "^origin$"; then
+        echo "ℹ️  Remote origin existe déjà, mise à jour..."
+        git remote set-url origin "$github_url"
+    else
+        echo "📎 Ajout du remote origin..."
+        git remote add origin "$github_url"
+    fi
+    
+    echo "🚀 Push vers GitHub..."
+    git branch -M main
+    git push -u origin main
+    
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo "✅ Code poussé sur GitHub avec succès!"
+        echo ""
         
-        echo "🚀 Push vers GitHub..."
-        git branch -M main
-        git push -u origin main
+        # Nettoyer l'URL avec le token des logs pour la sécurité
+        git remote set-url origin "https://github.com/${github_username}/${repo_name}.git"
+        echo "🔒 Token retiré de la configuration Git (pour la sécurité)"
+        echo ""
         
-        if [ $? -eq 0 ]; then
-            echo "✅ Code poussé sur GitHub!"
-            echo ""
-            echo "🎉 Vous pouvez maintenant:"
-            echo "   1. Aller sur render.com ou railway.app"
-            echo "   2. Créer un nouveau projet"
-            echo "   3. Connecter votre dépôt GitHub"
-            echo "   4. Configurer les variables d'environnement"
-            echo "   5. Déployer!"
-        else
-            echo "❌ Erreur lors du push"
-            echo "   Vérifiez vos identifiants GitHub"
-        fi
+        echo "🎉 Vous pouvez maintenant:"
+        echo "   1. Aller sur render.com ou railway.app"
+        echo "   2. Créer un nouveau projet"
+        echo "   3. Connecter votre dépôt GitHub: ${github_username}/${repo_name}"
+        echo "   4. Configurer les variables d'environnement"
+        echo "   5. Déployer!"
+        echo ""
+        echo "📍 Votre dépôt: https://github.com/${github_username}/${repo_name}"
+    else
+        echo ""
+        echo "❌ Erreur lors du push"
+        echo ""
+        echo "Causes possibles:"
+        echo "   - Token GitHub invalide ou expiré"
+        echo "   - Dépôt n'existe pas (créez-le sur github.com/new)"
+        echo "   - Pas de permissions suffisantes sur le dépôt"
+        echo ""
+        echo "💡 Vérifiez votre token sur: https://github.com/settings/tokens"
     fi
 else
     echo ""
     echo "ℹ️  D'accord! Vous pouvez le faire plus tard avec:"
-    echo "   git remote add origin <URL-GITHUB>"
+    echo ""
+    echo "   Option 1 - Avec token (sécurisé):"
+    echo "   git remote add origin https://TOKEN@github.com/USERNAME/REPO.git"
     echo "   git push -u origin main"
+    echo ""
+    echo "   Option 2 - Sans token (demandera identifiants):"
+    echo "   git remote add origin https://github.com/USERNAME/REPO.git"
+    echo "   git push -u origin main"
+    echo ""
 fi
 
 echo ""
