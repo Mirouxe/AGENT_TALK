@@ -241,3 +241,4 @@ Créé avec ❤️ pour simplifier la prise de notes vocales.
 
 **Note** : Ce projet utilise des APIs payantes (OpenAI). Vérifiez les coûts avant utilisation intensive.
 
+# AGENT_TALK
