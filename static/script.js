@@ -133,13 +133,19 @@ async function processAudio(audioBlob) {
         formData.append('audio', audioBlob, 'recording.webm');
         
         // Mettre à jour l'interface - Transcription
-        updateStepStatus('step-transcription', 'active', 'En cours...');
+        updateStepStatus('step-transcription', 'active', 'En cours... (peut prendre jusqu\'à 2 min pour les longs enregistrements)');
         
-        // Envoyer au serveur
+        // Envoyer au serveur avec un timeout généreux pour les longs enregistrements
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15 * 60 * 1000); // 15 minutes
+        
         const response = await fetch('/api/process-audio', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             throw new Error('Erreur lors du traitement de l\'audio');
@@ -235,6 +241,16 @@ function startTimer() {
         const minutes = Math.floor(elapsed / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
         timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        // Avertissement à 10 minutes (recommandation)
+        if (minutes === 10 && seconds === 0) {
+            console.log('⚠️ 10 minutes d\'enregistrement - Pensez à découper en plusieurs parties si possible');
+        }
+        
+        // Avertissement à 15 minutes (limite recommandée)
+        if (minutes === 15 && seconds === 0) {
+            console.warn('⚠️ 15 minutes - Durée maximale recommandée atteinte');
+        }
     }, 1000);
 }
 
